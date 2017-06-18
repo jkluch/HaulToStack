@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ModMetaData>
+  <name>HaulToStack</name>
+  <author>ItsComcastic</author>
+  <targetVersion>0.17.0</targetVersion>
+  <url></url>
+  <description>
+&lt;size=16&gt;Version 0.17&lt;/size&gt;
+Instead of hauling to random tiles your pawn *should* always haul to a stack if it has room on it
+  
+&lt;size=16&gt;Features&lt;/size&gt;
+Haulers will check for an existing stack to add it's haul item onto.  Haulers no longer reserve the haul-to tile meaning multiple pawns can haul to the same tile at once.
+
+&lt;size=16&gt;(Potential) Issues&lt;/size&gt;
+This overwrites the builtin JobDriver_HaulToCell.  If any other mods overwrite the JobDriver for hauling this mod will throw errors.  This mod should be compatible with most other mods but let me know if you have any issues.
+
+&lt;size=16&gt;Recommendations&lt;/size&gt;
+Install Stack Merger by Fluffy in addition to this mod.  On rare occasions pawns could haul items that don't have an existing stock pile into different tiles.  Both pawns will look for a location to place the item at the same time.  If nothing exists they may pick different tiles for placing.  Fluffy's mod will handle those use cases.
+  </description>
+</ModMetaData>

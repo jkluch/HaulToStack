@@ -8,7 +8,6 @@ bin/
 obj/
 Debug/
 Release/
-Mods/
 *.opensdf
 *.tlog
 *.log
