@@ -16,5 +16,8 @@ This overwrites the builtin JobDriver_HaulToCell.  If any other mods overwrite t
 
 &lt;size=16&gt;Recommendations&lt;/size&gt;
 Install Stack Merger by Fluffy in addition to this mod.  On rare occasions pawns could haul items that don't have an existing stock pile into different tiles.  Both pawns will look for a location to place the item at the same time.  If nothing exists they may pick different tiles for placing.  Fluffy's mod will handle those use cases.
+
+Thanks to:
+@Trips for the Haul to Stack preview picture.
   </description>
 </ModMetaData>
