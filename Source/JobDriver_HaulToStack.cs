@@ -56,6 +56,11 @@ namespace HaulToStack
 
 
             //Reserve target storage cell
+            if(pawn.RaceProps.Animal)
+            {
+                HaulToStack.Instance.Logger.Trace("Animal is hauling!");
+                yield return Toils_Reserve.Reserve(StoreCellInd);
+            }
             //yield return Toils_Reserve.Reserve(StoreCellInd);
 
             //Reserve thing to be stored

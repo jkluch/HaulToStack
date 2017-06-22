@@ -36,6 +36,9 @@ namespace HaulToStack
     [HarmonyPatch]
     static class Haul_Patch
     {
+
+        //static List<PlannedHauls> plannedHaulList = new List<PlannedHauls>();
+
         static MethodInfo TargetMethod()
         {
             return AccessTools.Method(typeof(Verse.AI.HaulAIUtility), "HaulToStorageJob", new Type[] { typeof(Pawn), typeof(Thing) });
@@ -51,9 +54,7 @@ namespace HaulToStack
         static bool TryFindBestBetterStoreCellForReplacement(Thing t, Pawn carrier, Map map, StoragePriority currentPriority, Faction faction, out IntVec3 foundCell, bool needAccurateResult = true)
         {
             //HaulToStack.Instance.Logger.Trace("FINDING STORAGE FOR ITEM " + t.def.defName);
-            /**
-             * Default Code
-             **/
+
             List<SlotGroup> allGroupsListInPriorityOrder = map.slotGroupManager.AllGroupsListInPriorityOrder;
             if (allGroupsListInPriorityOrder.Count == 0)
             {
@@ -64,6 +65,7 @@ namespace HaulToStack
             StoragePriority storagePriority = currentPriority;
             float num = 2.14748365E+09f;
             IntVec3 intVec = default(IntVec3);
+            IntVec3 plannedTile = default(IntVec3);
             bool flag = false;
             int count = allGroupsListInPriorityOrder.Count;
             for (int i = 0; i < count; i++)
@@ -93,7 +95,7 @@ namespace HaulToStack
                     {
                         IntVec3 intVec2 = cellsList[j];
                         float num3 = (float)(a - intVec2).LengthHorizontalSquared;
-                        
+
                         if (!(num3 <= num))
                         {
                             if (CellIsReachable(intVec2, map, t, carrier, faction))
@@ -124,13 +126,14 @@ namespace HaulToStack
                                 {
                                     flag = true;
                                     intVec = intVec2;
+                                    plannedTile = intVec;
                                     num = num3;
                                     storagePriority = priority;
                                 }
                                 else if (stackSituation.Equals("stackable"))
                                 {
                                     //This is the ideal situation
-                                    HaulToStack.Instance.Logger.Trace("We found a stacker!");
+                                    //HaulToStack.Instance.Logger.Trace("We found a stacker!");
                                     flag = true;
                                     intVec = intVec2;
                                     num = num3;
@@ -142,9 +145,22 @@ namespace HaulToStack
                                 }
                             }
                         }
+                        //if (IsGoodStoreCell_Replacement(intVec2, map, t, carrier, faction))
+                        //{
+                        //    flag = true;
+                        //    intVec = intVec2;
+                        //    num = num3;
+                        //    storagePriority = priority;
+                        //    if (j >= num2)
+                        //    {
+                        //        break;
+                        //    }
+                        //}
+
                     }
                 }
             }
+
             if (!flag)
             {
                 foundCell = IntVec3.Invalid;
@@ -152,11 +168,19 @@ namespace HaulToStack
                 return false;
             }
             foundCell = intVec;
+
+            /**
+             * TODO: continue working on this
+             */
+            //We're starting a new stack
+            //if(plannedTile.Equals(foundCell))
+            //{
+            //    PlannedHauls ph = new PlannedHauls(plannedTile, t);
+            //    plannedHaulList.Add(ph);
+            //}
+
             //HaulToStack.Instance.Logger.Trace("We found a stack location");
             return true;
-            /**
-             * Default Code
-             **/
         }
 
         static bool CellIsReachable(IntVec3 c, Map map, Thing t, Pawn carrier, Faction faction)
@@ -169,18 +193,17 @@ namespace HaulToStack
              * Commented out code here stops a check for tile reservation.
              * It might be a good idea to turn this back on now that the job doesn't reserve the tile
              */
-
-            //if (carrier != null)
-            //{
-            //    if (!carrier.CanReserve(c, 1, -1, null, false))
-            //    {
-            //        return false;
-            //    }
-            //}
-            //else if (map.reservationManager.IsReserved(c, faction))
-            //{
-            //    return false;
-            //}
+            if (carrier != null)
+            {
+                if (!carrier.CanReserve(c, 1, -1, null, false))
+                {
+                    return false;
+                }
+            }
+            else if (map.reservationManager.IsReserved(c, faction))
+            {
+                return false;
+            }
             return !c.ContainsStaticFire(map) && (carrier == null || carrier.Map.reachability.CanReach((!t.SpawnedOrAnyParentSpawned) ? carrier.PositionHeld : t.PositionHeld, c, PathEndMode.ClosestTouch, TraverseParms.For(carrier, Danger.Deadly, TraverseMode.ByPawn, false)));
         }
 
@@ -188,6 +211,7 @@ namespace HaulToStack
         static String CellCanStack(IntVec3 c, Map map, Thing thing)
         {
             List<Thing> list = map.thingGrid.ThingsListAt(c);
+            bool potentialStack = false;
             for (int i = 0; i < list.Count; i++)
             {
                 Thing thing2 = list[i];
@@ -220,67 +244,80 @@ namespace HaulToStack
                 }
                 if (thing2.def.defName.Equals(thing.def.defName))
                 {
-                    return "stackable";
+                    potentialStack = true;
                 }
             }
-
+            if(potentialStack)
+            {
+                return "stackable";
+            }
             return "clear";
         }
 
 
-        static bool IsGoodStoreCell_Replacement(IntVec3 c, Map map, Thing t, Pawn carrier, Faction faction)
-        {
-            if (carrier != null && c.IsForbidden(carrier))
-            {
-                return false;
-            }
-            if (!NoStorageBlockersIn(c, map, t))
-            {
-                return false;
-            }
-            if (carrier != null)
-            {
-                if (!carrier.CanReserve(c, 1, -1, null, false))
-                {
-                    return false;
-                }
-            }
-            else if (map.reservationManager.IsReserved(c, faction))
-            {
-                return false;
-            }
-            return !c.ContainsStaticFire(map) && (carrier == null || carrier.Map.reachability.CanReach((!t.SpawnedOrAnyParentSpawned) ? carrier.PositionHeld : t.PositionHeld, c, PathEndMode.ClosestTouch, TraverseParms.For(carrier, Danger.Deadly, TraverseMode.ByPawn, false)));
-        }
+        //static bool IsGoodStoreCell_Replacement(IntVec3 c, Map map, Thing t, Pawn carrier, Faction faction)
+        //{
+        //    if (carrier != null && c.IsForbidden(carrier))
+        //    {
+        //        HaulToStack.Instance.Logger.Trace("IsGoodStoreCell: " + 1);
+        //        return false;
+        //    }
+        //    if (!NoStorageBlockersIn(c, map, t))
+        //    {
+        //        HaulToStack.Instance.Logger.Trace("IsGoodStoreCell: " + 2);
+        //        return false;
+        //    }
+        //    if (carrier != null)
+        //    {
+        //        if (!carrier.CanReserve(c, 1, -1, null, false))
+        //        {
+        //            HaulToStack.Instance.Logger.Trace("IsGoodStoreCell: " + 3);
+        //            return false;
+        //        }
+        //    }
+        //    else if (map.reservationManager.IsReserved(c, faction))
+        //    {
+        //        HaulToStack.Instance.Logger.Trace("IsGoodStoreCell: " + 4);
+        //        return false;
+        //    }
+        //    HaulToStack.Instance.Logger.Trace("IsGoodStoreCell: " + 5);
+        //    return !c.ContainsStaticFire(map) && (carrier == null || carrier.Map.reachability.CanReach((!t.SpawnedOrAnyParentSpawned) ? carrier.PositionHeld : t.PositionHeld, c, PathEndMode.ClosestTouch, TraverseParms.For(carrier, Danger.Deadly, TraverseMode.ByPawn, false)));
+        //}
 
 
-        private static bool NoStorageBlockersIn(IntVec3 c, Map map, Thing thing)
-        {
-            List<Thing> list = map.thingGrid.ThingsListAt(c);
-            for (int i = 0; i < list.Count; i++)
-            {
-                Thing thing2 = list[i];
-                if (thing2.def.EverStoreable)
-                {
-                    if (!thing2.CanStackWith(thing))
-                    {
-                        return false;
-                    }
-                    if (thing2.stackCount >= thing.def.stackLimit)
-                    {
-                        return false;
-                    }
-                }
-                if (thing2.def.entityDefToBuild != null && thing2.def.entityDefToBuild.passability != Traversability.Standable)
-                {
-                    return false;
-                }
-                if (thing2.def.surfaceType == SurfaceType.None && thing2.def.passability != Traversability.Standable)
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
+        //private static bool NoStorageBlockersIn(IntVec3 c, Map map, Thing thing)
+        //{
+        //    List<Thing> list = map.thingGrid.ThingsListAt(c);
+        //    for (int i = 0; i < list.Count; i++)
+        //    {
+        //        Thing thing2 = list[i];
+        //        if (thing2.def.EverStoreable)
+        //        {
+        //            if (!thing2.CanStackWith(thing))
+        //            {
+        //                HaulToStack.Instance.Logger.Trace("NoStorageBlockersIn: " + 1);
+        //                return false;
+        //            }
+        //            if (thing2.stackCount >= thing.def.stackLimit)
+        //            {
+        //                HaulToStack.Instance.Logger.Trace("NoStorageBlockersIn: " + 2);
+        //                return false;
+        //            }
+        //        }
+        //        if (thing2.def.entityDefToBuild != null && thing2.def.entityDefToBuild.passability != Traversability.Standable)
+        //        {
+        //            HaulToStack.Instance.Logger.Trace("NoStorageBlockersIn: " + 3);
+        //            return false;
+        //        }
+        //        if (thing2.def.surfaceType == SurfaceType.None && thing2.def.passability != Traversability.Standable)
+        //        {
+        //            HaulToStack.Instance.Logger.Trace("NoStorageBlockersIn: " + 4);
+        //            return false;
+        //        }
+        //    }
+        //    HaulToStack.Instance.Logger.Trace("NoStorageBlockersIn: " + 5);
+        //    return true;
+        //}
     }
 
 }
