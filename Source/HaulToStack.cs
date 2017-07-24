@@ -37,7 +37,7 @@ namespace HaulToStack
     static class Haul_Patch
     {
 
-        //static List<PlannedHauls> plannedHaulList = new List<PlannedHauls>();
+        static List<PlannedHauls> plannedHaulList = new List<PlannedHauls>();
 
         static MethodInfo TargetMethod()
         {
@@ -104,7 +104,9 @@ namespace HaulToStack
                                 if (stackSituation.Equals("stackable"))
                                 {
                                     //This is the ideal situation
-                                    //HaulToStack.Instance.Logger.Trace("We found a stacker!");
+#if DEBUG
+                                    HaulToStack.Instance.Logger.Trace("We found a stacker!");
+#endif
                                     flag = true;
                                     intVec = intVec2;
                                     num = num3;
@@ -133,7 +135,9 @@ namespace HaulToStack
                                 else if (stackSituation.Equals("stackable"))
                                 {
                                     //This is the ideal situation
-                                    //HaulToStack.Instance.Logger.Trace("We found a stacker!");
+#if DEBUG
+                                    HaulToStack.Instance.Logger.Trace("We found a stacker!");
+#endif
                                     flag = true;
                                     intVec = intVec2;
                                     num = num3;
@@ -173,11 +177,17 @@ namespace HaulToStack
              * TODO: continue working on this
              */
             //We're starting a new stack
-            //if(plannedTile.Equals(foundCell))
-            //{
-            //    PlannedHauls ph = new PlannedHauls(plannedTile, t);
-            //    plannedHaulList.Add(ph);
-            //}
+            if (plannedTile.Equals(foundCell))
+            {
+
+#if DEBUG
+                PlannedHauls ph = new PlannedHauls(plannedTile, t, t.stackCount);
+                HaulToStack.Instance.Logger.Trace("Adding to Planned Hauls");
+                HaulToStack.Instance.Logger.Trace(t.def.defName + " " + t.stackCount);
+                plannedHaulList.Add(ph);
+#endif
+
+            }
 
             //HaulToStack.Instance.Logger.Trace("We found a stack location");
             return true;

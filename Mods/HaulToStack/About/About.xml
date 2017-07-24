@@ -5,19 +5,30 @@
   <targetVersion>0.17.0</targetVersion>
   <url></url>
   <description>
-&lt;size=16&gt;Version 0.17&lt;/size&gt;
+Version 0.17
+
 Instead of hauling to random tiles your pawn *should* always haul to a stack if it has room on it
   
-&lt;size=16&gt;Features&lt;/size&gt;
-Haulers will check for an existing stack to add it's haul item onto.  Haulers no longer reserve the haul-to tile meaning multiple pawns can haul to the same tile at once.
+Features
+Haulers will check for an existing stack to add it's item to.  Haulers no longer reserve the haul-to tile meaning multiple pawns can haul to the same tile at once.
 
-&lt;size=16&gt;(Potential) Issues&lt;/size&gt;
-This overwrites the builtin JobDriver_HaulToCell.  If any other mods overwrite the JobDriver for hauling this mod will throw errors.  This mod should be compatible with most other mods but let me know if you have any issues.
+Issues
+You may still see your pawns haul to different stacks, this will happen if there are no stacks, or full stacks in the stockpile and two or more pawns try to haul new items at once or if an animal is hauling.   Example:  If you get a pod drop with new loot and two pawns pickup some before any is placed, they might pick different spots in the stockpile to haul to.  I'm working on a system where they can share with eachother which tile they plan on placing new loot on which should fix that issue and prevent the need for Stack Merger by Fluffy
 
-&lt;size=16&gt;Recommendations&lt;/size&gt;
-Install Stack Merger by Fluffy in addition to this mod.  On rare occasions pawns could haul items that don't have an existing stock pile into different tiles.  Both pawns will look for a location to place the item at the same time.  If nothing exists they may pick different tiles for placing.  Fluffy's mod will handle those use cases.
+Conflicts
+It looks like there might be a conflict with a wall light mod if your stash runs against the wall light.  If you have wall lights against your stash take that tile out of your stockpile zone to prevent pawns from going into a loop of trying to haul over and over.  This issue isn't fixable by changing mod order unfortunately, I'll have to work with the mod creater on a solution.
+This overwrites the builtin JobDriver_HaulToCell.  If any other mods overwrite the JobDriver for hauling this mod will throw tile reservation errors.  This mod should be compatible with most other mods but let me know if you have any problems.
 
-Thanks to:
-@Trips for the Haul to Stack preview picture.
+*** IMPORTANT ***
+If you want to remove or turn off this mod you need to first make sure no one is performing or going to do a hauling job.
+You can force this by pausing, drafting any pawns where their state says they're 'Hauling", save.. turn off the mod, then load that save and undraft the pawns.  If you don't do this the pawn and what they were holding will 'disappear' and the game will throw errors.  If you reload your 'broken' save with the mod they should reappear.
+
+Recommendations
+Install Stack Merger by Fluffy in addition to this mod.  On rare occasions pawns could haul items that don't have an existing stock pile to different tiles because both pawns look for a location to place the item at the same time and if nothing exists they may pick different tiles for placing.  Fluffy's mod will handle those cases.
+
+Thanks to @Trips for the Haul to Stack preview picture.
+
+Github
+https://github.com/jkluch/HaulToStack
   </description>
 </ModMetaData>
