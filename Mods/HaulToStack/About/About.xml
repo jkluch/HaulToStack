@@ -2,18 +2,24 @@
 <ModMetaData>
   <name>Haul to Stack</name>
   <author>ItsComcastic</author>
-  <targetVersion>0.17.0</targetVersion>
+  <targetVersion>0.18.0</targetVersion>
   <url></url>
   <description>
-Version 0.17
+Version .18
 
 Instead of hauling to random tiles your pawn *should* always haul to a stack if it has room on it
   
 Features
-Haulers will check for an existing stack to add it's item to.  Haulers no longer reserve the haul-to tile meaning multiple pawns can haul to the same tile at once.
+Haulers will check for an existing stack to add it's item to.
+Haulers no longer reserve the haul-to tile meaning multiple pawns can haul to the same tile at once.
+
 
 Issues
-You may still see your pawns haul to different stacks, this will happen if there are no stacks, or full stacks in the stockpile and two or more pawns try to haul new items at once or if an animal is hauling.   Example:  If you get a pod drop with new loot and two pawns pickup some before any is placed, they might pick different spots in the stockpile to haul to.  I'm working on a system where they can share with eachother which tile they plan on placing new loot on which should fix that issue and prevent the need for Stack Merger by Fluffy
+You may still see your pawns haul to different stacks, this will happen under the following conditions:
+there are no existing stacks,
+the existing stacks are full
+
+Example:  If you get a pod drop with new loot and two pawns pickup some before any is placed, they might pick different spots in the stockpile to haul to.  I'm working on a system where they can share with eachother which tile they plan on placing new loot on which should fix that issue and prevent the need for Stack Merger by Fluffy
 
 Conflicts
 It looks like there might be a conflict with a wall light mod if your stash runs against the wall light.  If you have wall lights against your stash take that tile out of your stockpile zone to prevent pawns from going into a loop of trying to haul over and over.  This issue isn't fixable by changing mod order unfortunately, I'll have to work with the mod creater on a solution.
@@ -24,9 +30,9 @@ If you want to remove or turn off this mod you need to first make sure no one is
 You can force this by pausing, drafting any pawns where their state says they're 'Hauling", save.. turn off the mod, then load that save and undraft the pawns.  If you don't do this the pawn and what they were holding will 'disappear' and the game will throw errors.  If you reload your 'broken' save with the mod they should reappear.
 
 Recommendations
-Install Stack Merger by Fluffy in addition to this mod.  On rare occasions pawns could haul items that don't have an existing stock pile to different tiles because both pawns look for a location to place the item at the same time and if nothing exists they may pick different tiles for placing.  Fluffy's mod will handle those cases.
+Install Stack Merger by Fluffy in addition to this mod.
 
-Thanks to @Trips for the Haul to Stack preview picture.
+Thanks to @Trips on the rimworld discord server for the Haul to Stack preview picture.
 
 Github
 https://github.com/jkluch/HaulToStack

@@ -98,9 +98,12 @@ namespace HaulToStack
 
                         if (!(num3 <= num))
                         {
+#if DEBUG
+                            HaulToStack.Instance.Logger.Trace("Game usually doesn't attempt to haul on this condition");
+#endif
                             if (CellIsReachable(intVec2, map, t, carrier, faction))
                             {
-                                String stackSituation = CellCanStack(intVec2, map, t);
+                                string stackSituation = CellCanStack(intVec2, map, t);
                                 if (stackSituation.Equals("stackable"))
                                 {
                                     //This is the ideal situation
@@ -122,7 +125,7 @@ namespace HaulToStack
                         {
                             if (CellIsReachable(intVec2, map, t, carrier, faction))
                             {
-                                String stackSituation = CellCanStack(intVec2, map, t);
+                                string stackSituation = CellCanStack(intVec2, map, t);
 
                                 if (stackSituation.Equals("clear"))
                                 {
@@ -205,12 +208,12 @@ namespace HaulToStack
              */
             if (carrier != null)
             {
-                if (!carrier.CanReserve(c, 1, -1, null, false))
+                if (!carrier.CanReserveNew(c))
                 {
                     return false;
                 }
             }
-            else if (map.reservationManager.IsReserved(c, faction))
+            else if (faction != null && map.reservationManager.IsReservedByAnyoneOf(c, faction))
             {
                 return false;
             }
@@ -218,7 +221,7 @@ namespace HaulToStack
         }
 
 
-        static String CellCanStack(IntVec3 c, Map map, Thing thing)
+        static string CellCanStack(IntVec3 c, Map map, Thing thing)
         {
             List<Thing> list = map.thingGrid.ThingsListAt(c);
             bool potentialStack = false;
