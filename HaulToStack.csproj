@@ -32,6 +32,10 @@
     <RootNamespace>HaulToStack</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="0Harmony, Version=1.2.0.1, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Rimworld Dependencies\0Harmony.dll</HintPath>
+    </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>..\Rimworld Dependencies\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
@@ -118,11 +122,6 @@
     <Compile Include="Source\PlannedHauls.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Harmony\Harmony\Harmony.csproj">
-      <Project>{69aee16a-b6e7-4642-8081-3928b32455df}</Project>
-      <Name>Harmony</Name>
-      <Private>False</Private>
-    </ProjectReference>
     <ProjectReference Include="..\RimworldHugsLibChecker\HugsLibChecker.csproj">
       <Project>{a7dea100-952b-4516-b020-b66c8bcb4b50}</Project>
       <Name>HugsLibChecker</Name>
