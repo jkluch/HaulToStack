@@ -12,13 +12,28 @@ using Verse.AI;
 
 namespace HaulToStack
 {
+    [StaticConstructorOnStartup]
+    class Main
+    {
+        static Main()
+        {
+            var harmony = HarmonyInstance.Create("com.jkluch.HaulToStack");
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
+        }
+    }
+
     public class HaulToStack : ModBase
     {
         public static HaulToStack Instance { get; private set; }
 
         public override string ModIdentifier
         {
-            get { return "HaulToStack"; }
+            get { return "com.jkluch.HaulToStack"; }
+        }
+
+        protected override bool HarmonyAutoPatch
+        {
+            get { return false; }
         }
 
         public new ModLogger Logger
@@ -44,6 +59,7 @@ namespace HaulToStack
             return AccessTools.Method(typeof(Verse.AI.JobDriver_HaulToCell), "TryMakePreToilReservations", new Type[] { typeof(bool) });
         }
 
+
         static bool Prefix()
         {
             //Skip the TryMakePreToilReservations method
@@ -66,15 +82,15 @@ namespace HaulToStack
             //If stacklimit for this item is 1, then reserve the tile and the thing
             if (job.targetA.Thing.def.stackLimit <= 1)
             {
-                HaulToStack.Instance.Logger.Trace("Inside full reservation mode");
+                //HaulToStack.Instance.Logger.Trace("Inside full reservation mode");
                 if (pawn.Reserve(destination, job, 1, -1, null, errorOnFailed))
                 {
                     __result = pawn.Reserve(thing, job, 1, -1, null, errorOnFailed);
-                    HaulToStack.Instance.Logger.Trace("Result: " + __result.ToString());
+                    //HaulToStack.Instance.Logger.Trace("Result: " + __result.ToString());
                 }
                 else
                 {
-                    HaulToStack.Instance.Logger.Trace("Failed to reserve, setting result to false");
+                    //HaulToStack.Instance.Logger.Trace("Failed to reserve, setting result to false");
                     __result = false;
                 }
             }
@@ -82,9 +98,9 @@ namespace HaulToStack
             //Kluch: In the future we might want to set this based on whether or not the pawn can haul the whole stack or not
             else
             {
-                HaulToStack.Instance.Logger.Trace("Reserving just the thing");
+                //HaulToStack.Instance.Logger.Trace("Reserving just the thing");
                 __result = pawn.Reserve(thing, job, 1, -1, null, errorOnFailed);
-                HaulToStack.Instance.Logger.Trace("Result: " + __result.ToString());
+                //HaulToStack.Instance.Logger.Trace("Result: " + __result.ToString());
             }
         }
 
