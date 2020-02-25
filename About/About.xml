@@ -2,16 +2,12 @@
 <ModMetaData>
   <name>Haul to Stack</name>
   <author>ItsComcastic</author>
-  <!--<targetVersion>1.0.0</targetVersion>-->
   <supportedVersions>
       <li>1.0</li>
       <li>1.1</li>
   </supportedVersions>
   <packageId>jkluch.HaulToStack</packageId>
   <description>
-&lt;size=18&gt;Version 1.0.0&lt;/size&gt;
-&lt;size=18&gt;This version also works with beta 19&lt;/size&gt;
-
 &lt;size=18&gt;Features&lt;/size&gt;
 Haulers will check for an existing stack to add it's item to.
 Haulers no longer reserve the haul-to tile meaning multiple pawns can haul to the same tile at once.

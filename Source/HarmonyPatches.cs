@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Harmony;
+using HarmonyLib;
 using HugsLib;
 using HugsLib.Utils;
 using RimWorld;
@@ -19,19 +19,19 @@ namespace HaulToStack
 
         static HarmonyPatches()
         {
-            HarmonyInstance.DEBUG = true;
-            var harmony = HarmonyInstance.Create("com.jkluch.HaulToStack");
+            //Harmony.DEBUG = true;
+            var harmony = new Harmony("com.jkluch.HaulToStack");
 
             harmony.Patch(
                 original: AccessTools.Method(typeof(JobDriver_HaulToCell), "TryMakePreToilReservations", new Type[] { typeof(bool) }),
-                prefix: new HarmonyMethod(type: patchType, name: nameof(PreToilReservations_Prefix)),
-                postfix: new HarmonyMethod(type: patchType, name: nameof(PreToilReservations_Postfix))
+                prefix: new HarmonyMethod(methodType: patchType, methodName: nameof(PreToilReservations_Prefix)),
+                postfix: new HarmonyMethod(methodType: patchType, methodName: nameof(PreToilReservations_Postfix))
                 );
 
             harmony.Patch(
                 original: AccessTools.Method(typeof(StoreUtility), "TryFindBestBetterStoreCellForWorker"),
                 prefix: null,
-                postfix: new HarmonyMethod(type: patchType, name: nameof(TryFindBestBetterStoreCellForWorker_Postfix))
+                postfix: new HarmonyMethod(methodType: patchType, methodName: nameof(TryFindBestBetterStoreCellForWorker_Postfix))
                 );
 
             //Add a feature to CarryHauledThingToCell so if the haul-to tile is now reserved we look for a new location
