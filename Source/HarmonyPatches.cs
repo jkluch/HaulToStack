@@ -96,7 +96,19 @@ namespace HaulToStack
         //See if closestSlot already contains Thing, if not double check the whole storage cell to see if there's an existing stack we want to force our Thing onto
         static void TryFindBestBetterStoreCellForWorker_Postfix(Thing t, Pawn carrier, Map map, Faction faction, SlotGroup slotGroup, ref IntVec3 closestSlot)
         {
-
+            if (slotGroup == null || !slotGroup.parent.Accepts(t))
+            {
+                //So I don't think I needed this check in 1.0 but clearly this is needed in 1.1
+                //HaulToStack.Instance.Logger.Message("slotgroup is null or doesn't accept item");
+                return;
+            }
+            if (!closestSlot.InBounds(map))
+            {
+                //HaulToStack.Instance.Logger.Message("The original location picked to place item is out of bounds for an unknown reason");
+                //HaulToStack.Instance.Logger.Message($"Thing {t.def.defName} Pawn: {carrier.Name}");
+                //HaulToStack.Instance.Logger.Message($"Pawn: {carrier.Name}");
+                return;
+            }
             List<Thing> thingList = closestSlot.GetThingList(map);
             if (thingList.Exists(item => item.def.defName == t.def.defName))
             {
@@ -106,7 +118,16 @@ namespace HaulToStack
             {
                 //HaulToStack.Instance.Logger.Trace("THE PLACE WE WERE GOING TO HAUL TO DOESN'T HAVE: " + t.def.defName);
                 List<IntVec3> cellsList = slotGroup.CellsList;
-                List<IntVec3> filteredList = cellsList.FindAll(i => i.GetThingList(map).Exists(item => item.def.defName == t.def.defName));
+                foreach (IntVec3 cell in cellsList)
+                {
+                    if (!cell.InBounds(map))
+                    {
+                        //HaulToStack.Instance.Logger.Message("One of the cells in the provided slotGroup is out of bounds");
+                        return;
+                    }
+                }
+
+                    List<IntVec3> filteredList = cellsList.FindAll(i => i.GetThingList(map).Exists(item => item.def.defName == t.def.defName));
 
                 foreach (IntVec3 cell in filteredList)
                 {
