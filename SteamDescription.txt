@@ -1,21 +1,23 @@
-[h1]Compatible with Versions 1.0, 1.1[/h1]
+[h1]Compatible with Versions 1.0, 1.1, 1.2[/h1]
   
 [h1]Features[/h1]
-Haulers will check for an existing stack to add it's item to.
+Haulers will prioritize hauling to an existing stack even when multiple pawns are hauling.
 Haulers no longer reserve the haul-to tile meaning multiple pawns can haul to the same tile at once.
 
 
 [h1]Issues[/h1]
+If your pawns are just standing around go here: [url=https://steamcommunity.com/workshop/filedetails/discussion/949498803/1500126447404876222/] Standing Bug [/url]
+If your having other problems leave a comment with a description of your issue and/or feel free to message me in the steam group chat I've created [url=https://s.team/chat/PtlArmZM]here[/url].  It's a better way to discuss issues you might be having.
 You may still see your pawns haul to different stacks, this will happen under the following conditions:
 [list]
 [*]there are no existing stacks
-[*]the existing stacks are full[/list]
-
+[*]the existing stacks are full
+[*]pawn is hauling more than the destination stack can hold[/list]
 Example:  If you get a pod drop with new loot and two pawns pickup some before any is placed, they might pick different spots in the stockpile to haul to.  I'm working on a system where they can share with eachother which tile they plan on placing new loot on which should fix that issue.
 
 [h1]Conflicts[/h1]
-It looks like there might be a conflict with a wall light mod if your stash runs against the wall light.  If you have wall lights against your stash take that tile out of your stockpile zone to prevent pawns from going into a loop of trying to haul over and over.  This issue isn't fixable by changing mod order unfortunately, I'll have to work with the mod creater on a solution.
-This overwrites the builtin JobDriver_HaulToCell.  If any other mods overwrite the JobDriver for hauling this mod will throw tile reservation errors.  This mod should be compatible with most other mods but let me know if you have any problems.
+This mod doesn't work well with PickUpAndHaul.  Using both won't cause the game to crash or anything.. my mod just doesn't really work when you're using PickUpAndHaul.  I looked into potentially fixing this but due to how PickUpAndHaul is written, a fix for this particular issue is beyond my current skill level.  I do revisit this conflict occasionally but unfortunately I don't anticipate ever actually pushing out a fix.  That being said I've created a discussion thread you can subscribe to if you'd like updates on the status of this conflict if I have any (I locked the thread so you won't get 'I have this issue too' notifications)
+https://steamcommunity.com/workshop/filedetails/discussion/949498803/1736595227837401833/
 
 
 Thanks to @Trips on the rimworld discord server for the Haul to Stack preview picture.
