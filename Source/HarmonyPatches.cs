@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using HarmonyLib;
-using HugsLib;
-using HugsLib.Utils;
 using RimWorld;
 using Verse;
-using System.Reflection;
 using Verse.AI;
-using System.Reflection.Emit;
 
 namespace HaulToStack
 {
@@ -63,9 +59,11 @@ namespace HaulToStack
             const TargetIndex StoreCellInd = TargetIndex.B;
             LocalTargetInfo thing = __instance.job.GetTarget(HaulableInd);
             LocalTargetInfo destination = __instance.job.GetTarget(StoreCellInd);
-
-            //HaulToStack.Instance.Logger.Trace("FINDING STORAGE FOR ITEM " + job.targetA.Thing.def.defName);
-            //HaulToStack.Instance.Logger.Trace("Error on fail: " + errorOnFailed.ToString());
+            //HaulToStack.Instance.Logger.Trace("---------------- Start of PreToilReservations_Postfix ----------------");
+            //HaulToStack.Instance.Logger.Trace("Pawn " + pawn.Name + " finding storage for: " + job.targetA.Thing.def.defName);
+            //HaulToStack.Instance.Logger.Trace("Stack limit:" + job.targetA.Thing.def.stackLimit);
+            //HaulToStack.Instance.Logger.Trace("Placing at: " + destination.Cell.GetSlotGroup(pawn.Map));
+            //HaulToStack.Instance.Logger.Trace("Error on fail set to: " + errorOnFailed.ToString());
             //HaulToStack.Instance.Logger.Trace("Initial result: " + __result.ToString());
 
             //If stacklimit for this item is 1, then reserve the tile and the thing
@@ -74,28 +72,31 @@ namespace HaulToStack
                 //HaulToStack.Instance.Logger.Trace("Inside full reservation mode");
                 if (pawn.Reserve(destination, job, 1, -1, null, errorOnFailed))
                 {
+                    //HaulToStack.Instance.Logger.Trace("Pawn reserve was successful on destination");
                     __result = pawn.Reserve(thing, job, 1, -1, null, errorOnFailed);
-                    //HaulToStack.Instance.Logger.Trace("Result: " + __result.ToString());
+                    //HaulToStack.Instance.Logger.Trace("Pawn reserve returned " + __result.ToString() + " on thing");
                 }
                 else
                 {
-                    //HaulToStack.Instance.Logger.Trace("Failed to reserve, setting result to false");
+                    //HaulToStack.Instance.Logger.Trace("Failed to reserve destination, setting result to false");
                     __result = false;
                 }
             }
             //We always want to reserve what we're hauling
             //Kluch: In the future we might want to set this based on whether or not the pawn can haul the whole stack or not
+            //I tried not reserving the thing but other pawns wtill wouldn't haul from that stack so we're going to just reserve it
             else
             {
                 //HaulToStack.Instance.Logger.Trace("Reserving just the thing");
                 __result = pawn.Reserve(thing, job, 1, -1, null, errorOnFailed);
-                //HaulToStack.Instance.Logger.Trace("Result: " + __result.ToString());
             }
+            //HaulToStack.Instance.Logger.Trace("Result: " + __result.ToString());
         }
 
         //See if closestSlot already contains Thing, if not double check the whole storage cell to see if there's an existing stack we want to force our Thing onto
         static void TryFindBestBetterStoreCellForWorker_Postfix(Thing t, Pawn carrier, Map map, Faction faction, SlotGroup slotGroup, ref IntVec3 closestSlot)
         {
+
             if (slotGroup == null || !slotGroup.parent.Accepts(t))
             {
                 //So I don't think I needed this check in 1.0 but clearly this is needed in 1.1
@@ -109,6 +110,7 @@ namespace HaulToStack
                 //HaulToStack.Instance.Logger.Message($"Pawn: {carrier.Name}");
                 return;
             }
+
             List<Thing> thingList = closestSlot.GetThingList(map);
             if (thingList.Exists(item => item.def.defName == t.def.defName))
             {
@@ -120,23 +122,21 @@ namespace HaulToStack
                 List<IntVec3> cellsList = slotGroup.CellsList;
                 foreach (IntVec3 cell in cellsList)
                 {
-                    if (!cell.InBounds(map))
+                    if (cell.InBounds(map))
                     {
-                        //HaulToStack.Instance.Logger.Message("One of the cells in the provided slotGroup is out of bounds");
-                        return;
+                        //HaulToStack.Instance.Logger.Message("cell in the provided slotGroup is in bounds");
+                        //return;
+                        if (cell.GetThingList(map).Exists(item => item.def.defName == t.def.defName))
+                        {
+                            if (StoreUtility.IsGoodStoreCell(cell, map, t, carrier, faction))
+                            {
+                                //HaulToStack.Instance.Logger.Trace("FOUND AN EXISTING TILE WITH " + t.def.defName);
+                                closestSlot = cell;
+                                return;
+                            }
+                        }
                     }
-                }
-
-                    List<IntVec3> filteredList = cellsList.FindAll(i => i.GetThingList(map).Exists(item => item.def.defName == t.def.defName));
-
-                foreach (IntVec3 cell in filteredList)
-                {
-                    if (StoreUtility.IsGoodStoreCell(cell, map, t, carrier, faction))
-                    {
-                        //HaulToStack.Instance.Logger.Trace("FOUND AN EXISTING TILE WITH " + t.def.defName);
-                        closestSlot = cell;
-                        return;
-                    }
+                    //HaulToStack.Instance.Logger.Message("cell in the provided slotGroup is out of bounds");
                 }
 
                 //HaulToStack.Instance.Logger.Trace("TILE WITH EXISTING STACK OF " + t.def.defName + " DOES NOT EXIST, USING PREDETERMINED STACK LOCATION");
