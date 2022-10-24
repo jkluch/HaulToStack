@@ -18,6 +18,8 @@ namespace HaulToStack
         //Constants
         private const TargetIndex HaulableInd = TargetIndex.A;
         private const TargetIndex StoreCellInd = TargetIndex.B;
+        private const int MinimumHaulingJobTicks = GenTicks.TicksPerRealSecond / 2;
+        protected virtual bool DropCarriedThingIfNotTarget => false;
 
         public override void ExposeData()
         {
@@ -45,9 +47,9 @@ namespace HaulToStack
                 destName = destGroup.parent.SlotYielderLabel();
 
             if (destName != null)
-                return "ReportHaulingTo".Translate(hauledThing.Label, destName);
+                return "ReportHaulingTo".Translate(hauledThing.Label, destName.Named("DESTINATION"), hauledThing.Named("THING"));
             else
-                return "ReportHauling".Translate(hauledThing.Label);
+                return "ReportHauling".Translate(hauledThing.Label, hauledThing);
         }
 
         public override bool TryMakePreToilReservations(bool errorOnFailed)
@@ -71,6 +73,11 @@ namespace HaulToStack
                 forbiddenInitially = false;
         }
 
+        protected virtual Toil BeforeDrop()
+        {
+            return Toils_General.Label();
+        }
+
         protected override IEnumerable<Toil> MakeNewToils()
         {
             //Set fail conditions
@@ -85,6 +92,8 @@ namespace HaulToStack
             if (!forbiddenInitially)
                 this.FailOnForbidden(HaulableInd);
 
+            Toils_General.DoAtomic(() => startTick = Find.TickManager.TicksGame);
+
             //Reserve thing to be stored
             //This is redundant relative to MakePreToilReservations(), but the redundancy doesn't hurt, and if we end up looping and grabbing more things, it's necessary
             var reserveTargetA = Toils_Reserve.Reserve(HaulableInd);
@@ -97,9 +106,24 @@ namespace HaulToStack
             //Only do this if (current stack size + what pawn is currently holding + targetA stack size) >= things max stack size
             //if (HaulUtils.ShouldReserveHaulLocation(job.targetA.Thing, job.targetB.Cell, pawn, Map))
             //{
-                var reserveTargetB = Toils_Reserve.Reserve(StoreCellInd);
-                yield return reserveTargetB;
+            //var reserveTargetB = Toils_Reserve.Reserve(StoreCellInd);
+            //yield return reserveTargetB;
             //}
+
+            Toil postCarry = Toils_General.Label();
+
+            yield return Toils_Jump.JumpIf(postCarry, () => pawn.carryTracker.CarriedThing is Thing carriedThing
+                && carriedThing == pawn.jobs.curJob.GetTarget(HaulableInd).Thing);
+
+            yield return Toils_General.DoAtomic(() =>
+            {
+                if (DropCarriedThingIfNotTarget && pawn.IsCarrying())
+                {
+                    if (DebugViewSettings.logCarriedBetweenJobs)
+                        Log.Message($"Dropping {pawn.carryTracker.CarriedThing} because it is not the designated Thing to haul.");
+                    pawn.carryTracker.TryDropCarriedThing(pawn.Position, ThingPlaceMode.Near, out _);
+                }
+            });
 
 
             Toil toilGoto = null;
@@ -128,6 +152,8 @@ namespace HaulToStack
 
             yield return Toils_Haul.StartCarryThing(HaulableInd, subtractNumTakenFromJobCount: true);
 
+            yield return postCarry;
+
             if (job.haulOpportunisticDuplicates)
             {
                 yield return Toils_Haul.CheckForGetOpportunityDuplicate(reserveTargetA, HaulableInd, StoreCellInd);
@@ -150,7 +176,25 @@ namespace HaulToStack
             Toil carryToCell = Toils_Haul.CarryHauledThingToCell(StoreCellInd);
             yield return carryToCell;
 
+            // A minimum amount of time ensures a pawn can't just instantly teleport items within reach.
+            yield return PossiblyDelay();
+
+            yield return BeforeDrop();
+
             yield return Toils_Haul.PlaceHauledThingInCell(StoreCellInd, carryToCell, true);
+        }
+
+        private Toil PossiblyDelay()
+        {
+            var toil = ToilMaker.MakeToil();
+            toil.atomicWithPrevious = true;
+            toil.tickAction = () =>
+            {
+                if (Find.TickManager.TicksGame >= startTick + MinimumHaulingJobTicks)
+                    ReadyForNextToil();
+            };
+            toil.defaultCompleteMode = ToilCompleteMode.Never;
+            return toil;
         }
     }
 }
