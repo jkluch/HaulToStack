@@ -120,25 +120,6 @@ namespace HaulToStack
         //See if closestSlot already contains Thing, if not double check the whole storage cell to see if there's an existing stack we want to force our Thing onto
         static void TryFindBestBetterStoreCellForWorker_Postfix(Thing t, Pawn carrier, Map map, Faction faction, ISlotGroup slotGroup, ref IntVec3 closestSlot)
         {
-            //StorageSettings storageSettings = null;
-            //if (slotGroup is SlotGroup aSlotGroup)
-            //{
-            //    storageSettings = aSlotGroup.Settings;
-            //}
-            //else if (slotGroup is StorageGroup aStorageGroup)
-            //{
-            //    storageSettings = aStorageGroup.GetStoreSettings();
-            //}
-            //else
-            //{
-            //    LogMessage("slotGroup is type: " + slotGroup.GetType().ToString() + " but we expected SlotGroup or StorageGroup");
-            //    return;
-            //}
-            //if (slotGroup == null || !storageSettings.AllowedToAccept(t))
-            //{
-            //    return;
-            //}
-
             // It's possible TryFindBestBetterStoreCellForWorker didn't find a valid slot in the slotGroup.
             // If this is the case then closestSlot is invalid and there's no reason to check further.
             if (!closestSlot.IsValid)
